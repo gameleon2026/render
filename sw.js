@@ -1,4 +1,4 @@
-var version = "2.25.4";
+var version = "2.25.5";
 
 const cacheName = `superSplat-v${version}`;
 const cacheUrls = [
@@ -48,7 +48,18 @@ self.addEventListener('fetch', (event) => {
     // PLY is large and often loaded with Range (206) / revalidation (304). Cache-first
     // can surface empty or wrong bodies in DevTools; never use the app shell cache for it.
     if (url.pathname.endsWith('.ply')) {
-        event.respondWith(fetch(req));
+        event.respondWith(fetch(new Request(req.url, {
+            method: req.method,
+            headers: req.headers,
+            mode: req.mode,
+            credentials: req.credentials,
+            cache: 'no-store',
+            redirect: req.redirect,
+            referrer: req.referrer,
+            referrerPolicy: req.referrerPolicy,
+            integrity: req.integrity,
+            keepalive: req.keepalive
+        })));
         return;
     }
     event.respondWith(caches.match(req)
